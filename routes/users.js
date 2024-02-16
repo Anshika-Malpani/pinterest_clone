@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const plm = require("passport-local-mongoose")
-mongoose.connect("mongodb://127.0.0.1:27017/pinterest")
+mongoose.connect("mongodb+srv://malpanianshi:malpanianshi2805@cluster0.kmbiglz.mongodb.net/pinterest")
 
 const userschema = mongoose.Schema({
   username: String,
