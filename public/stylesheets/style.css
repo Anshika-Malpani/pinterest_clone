@@ -10,6 +10,9 @@
   box-sizing: border-box;
   font-family: 'Gellix';
 }
+body{
+  background-color: rgb(39, 39, 42);
+}
 
 
 input::-webkit-outer-spin-button,
