@@ -17,7 +17,7 @@ router.get('/register', function(req, res, next) {
 
 router.get('/profile',isLoggedIn, async function(req, res, next) {
   const user =
-  await userModel
+  await userModel 
       .findOne({username:req.session.passport.user})
       .populate('posts')
       // console.log(user);
@@ -59,8 +59,9 @@ router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(
 });
 
 router.post('/fileupload',isLoggedIn, upload.single('image'), async function(req, res, next) {
+  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
  const user =await userModel.findOne({username:req.session.passport.user})
- user.profileImage=req.file.filename;
+ user.profileImage=dataURL;
  await user.save();
  res.redirect("/profile");
 });
