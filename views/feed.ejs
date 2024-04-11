@@ -4,7 +4,7 @@
         <% posts.forEach(function(elem){ %>
             <div class="card w-32 ">
                 <div class=" w-32 h-40 bg-zinc-700 rounded-lg overflow-hidden ">
-                    <img class="w-full h-full object-cover" src="/images/uploads/<%= elem.image %>" alt="">
+                    <img class="w-full h-full object-cover" src="<%= elem.image %>" alt="">
                 </div>
                 <h3 class="mt-2 text-md "><%= elem.title %></h3>
                 <h5 class=" mt-2 text-sm opacity-60">@<%= elem.user.username %></h5>

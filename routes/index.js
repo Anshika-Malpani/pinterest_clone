@@ -46,12 +46,13 @@ router.get('/add',isLoggedIn, async function(req, res, next) {
 });
 
 router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(req, res, next) {
+  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
   const user =await userModel.findOne({username:req.session.passport.user})
   const post =await postModel.create({
     user:user._id,
     title:req.body.title,
     description:req.body.description,
-    image:req.file.filename
+    image:dataURL
   });
   user.posts.push(post._id)
   await user.save();
