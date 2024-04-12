@@ -115,8 +115,11 @@ router.get('/add',isLoggedIn, async function(req, res, next) {
 // });
 
 router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(req, res, next) {
+  // const image = await Jimp.read(req.file.buffer);
+  // await image.resize(800, Jimp.AUTO);
+  // const resizedImageBuffer = await image.quality(80).getBufferAsync(Jimp.MIME_WEBP);
  
-  const dataURL = `data:image/webp;base64,${resizedImageBuffer.toString('base64')}`;
+  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
   const user =await userModel.findOne({username:req.session.passport.user})
   const post =await postModel.create({
     user:user._id,
@@ -131,7 +134,7 @@ router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(
 
 router.post('/fileupload',isLoggedIn, upload.single('image'), async function(req, res, next) {
   
-const dataURL = `data:image/webp;base64,${resizedImageBuffer.toString('base64')}`;
+  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
  const user =await userModel.findOne({username:req.session.passport.user})
  user.profileImage=dataURL;
  await user.save();
