@@ -6,11 +6,12 @@ var userModel = require('./users');
 var postModel = require('./post');
 passport.use(new localStrategy(userModel.authenticate()))
 const upload=require("./multer")
+const Jimp=require("jimp")
 
 
 var router = express.Router();
 router.get('/', function(req, res, next) {
-  res.render('index',{nav:false});
+  res.render('index',{nav:false})
 });
 
 router.get('/register', function(req, res, next) {
@@ -115,11 +116,17 @@ router.get('/add',isLoggedIn, async function(req, res, next) {
 // });
 
 router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(req, res, next) {
-  // const image = await Jimp.read(req.file.buffer);
-  // await image.resize(800, Jimp.AUTO);
-  // const resizedImageBuffer = await image.quality(80).getBufferAsync(Jimp.MIME_WEBP);
- 
-  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  const image = await Jimp.read(req.file.buffer);
+  // Resize the image to a width of 800 pixels, maintaining aspect ratio
+  image.resize(800, Jimp.AUTO);
+  // Adjust the quality of the image to reduce file size
+  image.quality(80); // Adjust the quality percentage as needed
+
+  // Get the image buffer
+  const buffer = await image.getBufferAsync(Jimp.MIME_JPEG); // You can specify the desired output format
+
+  // Convert the buffer to a Base64 string
+  const dataURL = `data:image/webp;base64,${buffer.toString('base64')}`;
   const user =await userModel.findOne({username:req.session.passport.user})
   const post =await postModel.create({
     user:user._id,
@@ -133,8 +140,18 @@ router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(
 });
 
 router.post('/fileupload',isLoggedIn, upload.single('image'), async function(req, res, next) {
-  
-  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  const image = await Jimp.read(req.file.buffer);
+  // Resize the image to a width of 800 pixels, maintaining aspect ratio
+  image.resize(800, Jimp.AUTO);
+  // Adjust the quality of the image to reduce file size
+  image.quality(80); // Adjust the quality percentage as needed
+
+  // Get the image buffer
+  const buffer = await image.getBufferAsync(Jimp.MIME_JPEG); // You can specify the desired output format
+
+  // Convert the buffer to a Base64 string
+  const dataURL = `data:image/webp;base64,${buffer.toString('base64')}`;
+  // const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
  const user =await userModel.findOne({username:req.session.passport.user})
  user.profileImage=dataURL;
  await user.save();
