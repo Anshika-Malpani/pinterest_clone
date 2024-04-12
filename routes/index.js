@@ -1,12 +1,14 @@
 var express = require('express');
+const axios = require('axios'); 
 const passport = require('passport');
-var router = express.Router();
 const localStrategy=require("passport-local")
 var userModel = require('./users');
 var postModel = require('./post');
 passport.use(new localStrategy(userModel.authenticate()))
 const upload=require("./multer")
+const sharp = require('sharp');
 
+var router = express.Router();
 router.get('/', function(req, res, next) {
   res.render('index',{nav:false});
 });
@@ -45,8 +47,79 @@ router.get('/add',isLoggedIn, async function(req, res, next) {
   res.render('add',{user,nav:true});
 });
 
+ // Ensure axios is required at the top of your file
+
+// router.post('/createpost', isLoggedIn, upload.single('postimage'), async function(req, res, next) {
+//   // Convert the uploaded file to Base64
+//   const base64Image = req.file.buffer.toString('base64');
+
+//   // Set up the API request payload
+//   const apiPayload = {
+//     "Parameters": [
+//       {
+//         "Name": "File",
+//         "FileValue": {
+//           "Name": "my_file.ai",
+//           "Data": base64Image
+//         }
+//       },
+//       {
+//         "Name": "StoreFile",
+//         "Value": true
+//       }
+//     ]
+//   };
+
+//   // Set up the API request headers
+//   const config = {
+//     headers: {
+//       'Content-Type': 'application/json'
+//     }
+//   };
+
+//   // Replace '0TsqAfPEvqQXnxNk' with your actual Secret key
+//   const apiUrl = 'https://v2.convertapi.com/convert/ai/to/webp?Secret=0TsqAfPEvqQXnxNk';
+
+//   try {
+//     // Send the POST request to ConvertAPI
+//     const response = await axios.post(apiUrl, apiPayload, config);
+
+//     // Assuming the API response contains the URL to the converted image
+//     const convertedImageUrl = response.data.Files[0].Url;
+//     sharp(convertedImageUrl)
+//     .resize({ width: 800 }) // Optional: Resize if you want to change dimensions
+//     .webp({ quality: 80 }) // Adjust quality to reduce file size
+//     .toBuffer()
+//     .then(processedImageBuffer => {
+//       console.log(processedImageBuffer);
+//         // Use `processedImageBuffer` for your next steps, e.g., saving to your database
+//     })
+//     .catch(error => {
+//         console.error("Error processing image:", error);
+//     });
+//     // Now you can use `convertedImageUrl` for your next steps, for example, saving it to your database
+//     const user = await userModel.findOne({username: req.session.passport.user});
+//     const post = await postModel.create({
+//       user: user._id,
+//       title: req.body.title,
+//       description: req.body.description,
+//       image: convertedImageUrl // Use the URL of the converted image
+//     });
+//     user.posts.push(post._id);
+//     await user.save();
+//     res.redirect("/profile");
+//   } catch (error) {
+//     console.error("Error converting file:", error);
+//     res.status(500).send("Error processing your request");
+//   }
+// });
+
 router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(req, res, next) {
-  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  const resizedImageBuffer = await sharp(req.file.buffer)
+    .resize(800) // Resize to 800px width, keeping aspect ratio
+    .webp({ quality: 80 }) // Convert to WebP with 80% quality
+    .toBuffer();
+  const dataURL = `data:image/webp;base64,${resizedImageBuffer.toString('base64')}`;
   const user =await userModel.findOne({username:req.session.passport.user})
   const post =await postModel.create({
     user:user._id,
@@ -60,7 +133,11 @@ router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(
 });
 
 router.post('/fileupload',isLoggedIn, upload.single('image'), async function(req, res, next) {
-  const dataURL = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  const resizedImageBuffer = await sharp(req.file.buffer)
+  .resize(800) // Resize to 800px width, keeping aspect ratio
+  .webp({ quality: 80 }) // Convert to WebP with 80% quality
+  .toBuffer();
+const dataURL = `data:image/webp;base64,${resizedImageBuffer.toString('base64')}`;
  const user =await userModel.findOne({username:req.session.passport.user})
  user.profileImage=dataURL;
  await user.save();
