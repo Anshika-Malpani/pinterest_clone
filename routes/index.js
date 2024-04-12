@@ -6,7 +6,7 @@ var userModel = require('./users');
 var postModel = require('./post');
 passport.use(new localStrategy(userModel.authenticate()))
 const upload=require("./multer")
-const sharp = require('sharp');
+
 
 var router = express.Router();
 router.get('/', function(req, res, next) {
@@ -115,10 +115,7 @@ router.get('/add',isLoggedIn, async function(req, res, next) {
 // });
 
 router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(req, res, next) {
-  const resizedImageBuffer = await sharp(req.file.buffer)
-    .resize(800) // Resize to 800px width, keeping aspect ratio
-    .webp({ quality: 80 }) // Convert to WebP with 80% quality
-    .toBuffer();
+ 
   const dataURL = `data:image/webp;base64,${resizedImageBuffer.toString('base64')}`;
   const user =await userModel.findOne({username:req.session.passport.user})
   const post =await postModel.create({
@@ -133,10 +130,7 @@ router.post('/createpost',isLoggedIn,upload.single('postimage'), async function(
 });
 
 router.post('/fileupload',isLoggedIn, upload.single('image'), async function(req, res, next) {
-  const resizedImageBuffer = await sharp(req.file.buffer)
-  .resize(800) // Resize to 800px width, keeping aspect ratio
-  .webp({ quality: 80 }) // Convert to WebP with 80% quality
-  .toBuffer();
+  
 const dataURL = `data:image/webp;base64,${resizedImageBuffer.toString('base64')}`;
  const user =await userModel.findOne({username:req.session.passport.user})
  user.profileImage=dataURL;
